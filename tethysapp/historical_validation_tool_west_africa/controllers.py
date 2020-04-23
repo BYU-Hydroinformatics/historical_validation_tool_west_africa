@@ -229,8 +229,6 @@ def get_simulated_bc_data(request):
             for month in months:
                 data_month = data_year[data_year.index.month == int(month)]
 
-                print(year, '-', month)
-
                 # select a specific month for bias correction example
                 # in this case we will use current month from forecast
                 iniDate = data_month.index[0]
