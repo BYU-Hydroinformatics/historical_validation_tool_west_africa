@@ -68,6 +68,7 @@ def get_discharge_data(request):
             x=datesDischarge,
             y=dataDischarge,
             name='Observed Discharge',
+            line=dict(color='#636efa')
         )
 
         layout = go.Layout(title='Observed Streamflow at {0}-{1} <br> COMID: {2}'.format(watershed, subbasin, comid),
@@ -132,6 +133,7 @@ def get_simulated_data(request):
             name='Simulated Discharge',
             x=era_dates,
             y=era_values,
+            line=dict(color='#ef553b')
         )
 
         layout = go.Layout(
@@ -316,6 +318,7 @@ def get_simulated_bc_data(request):
             name='Corrected Simulated Discharge',
             x=dates,
             y=values,
+            line=dict(color='#00cc96')
         )
 
         layout = go.Layout(
@@ -1079,14 +1082,16 @@ def get_scatterPlot(request):
             x=merged_df.iloc[:, 0].values,
             y=merged_df.iloc[:, 1].values,
             mode='markers',
-            name='original'
+            name='original',
+            marker=dict(color='#ef553b')
         )
 
         scatter_data2 = go.Scatter(
             x=merged_df2.iloc[:, 0].values,
             y=merged_df2.iloc[:, 1].values,
             mode='markers',
-            name='corrected'
+            name='corrected',
+            marker=dict(color='#00cc96')
         )
 
         min_value = min(min(merged_df.iloc[:, 1].values), min(merged_df.iloc[:, 0].values))
@@ -1099,7 +1104,8 @@ def get_scatterPlot(request):
             x=[min_value, max_value],
             y=[min_value, max_value],
             mode='lines',
-            name='45deg line'
+            name='45deg line',
+            line=dict(color='black')
         )
 
         slope, intercept, r_value, p_value, std_err = sp.linregress(merged_df.iloc[:, 0].values,
@@ -1112,14 +1118,16 @@ def get_scatterPlot(request):
             x=[min_value, max_value],
             y=[slope * min_value + intercept, slope * max_value + intercept],
             mode='lines',
-            name='{0}x + {1} (Original)'.format(str(round(slope, 2)), str(round(intercept, 2)))
+            name='{0}x + {1} (Original)'.format(str(round(slope, 2)), str(round(intercept, 2))),
+            line=dict(color='red')
         )
 
         line_adjusted2 = go.Scatter(
             x=[min_value, max_value],
-            y=[slope2 * min_value2 + intercept2, slope2 * max_value2 + intercept2],
+            y=[slope2 * min_value + intercept2, slope2 * max_value + intercept2],
             mode='lines',
-            name='{0}x + {1} (Corrected)'.format(str(round(slope2, 2)), str(round(intercept2, 2)))
+            name='{0}x + {1} (Corrected)'.format(str(round(slope2, 2)), str(round(intercept2, 2))),
+            line=dict(color='green')
         )
 
         layout = go.Layout(title='Scatter Plot for  {0}-{1} <br> COMID: {2}'.format(watershed, subbasin, comid),
@@ -1307,14 +1315,16 @@ def get_scatterPlotLogScale(request):
             x=merged_df.iloc[:, 0].values,
             y=merged_df.iloc[:, 1].values,
             mode='markers',
-            name='original'
+            name='original',
+            marker=dict(color='#ef553b')
         )
 
         scatter_data2 = go.Scatter(
             x=merged_df2.iloc[:, 0].values,
             y=merged_df2.iloc[:, 1].values,
             mode='markers',
-            name='corrected'
+            name='corrected',
+            marker=dict(color='#00cc96')
         )
 
         min_value = min(min(merged_df.iloc[:, 1].values), min(merged_df.iloc[:, 0].values))
@@ -1324,7 +1334,8 @@ def get_scatterPlotLogScale(request):
             x=[min_value, max_value],
             y=[min_value, max_value],
             mode='lines',
-            name='45deg line'
+            name='45deg line',
+            line=dict(color='black')
         )
 
         layout = go.Layout(title='Scatter Plot for  {0}-{1} <br> COMID: {2}'.format(watershed, subbasin, comid),
