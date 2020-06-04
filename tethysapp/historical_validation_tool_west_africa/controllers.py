@@ -1,26 +1,20 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from tethys_sdk.gizmos import PlotlyView
-from django.http import HttpResponse, JsonResponse
-
-import pandas as pd
 import io
-import math
-import requests
-import json
-import numpy as np
-import datetime as dt
-import plotly.graph_objs as go
-import hydrostats as hs
-import hydrostats.data as hd
-from HydroErr.HydroErr import metric_names, metric_abbr
-import scipy.stats as sp
-from scipy import integrate
-from scipy import interpolate
-from functools import reduce
-import geoglows
 import traceback
 from csv import writer as csv_writer
+
+import geoglows
+import hydrostats as hs
+import hydrostats.data as hd
+import pandas as pd
+import plotly.graph_objs as go
+import requests
+import scipy.stats as sp
+from HydroErr.HydroErr import metric_names, metric_abbr
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from scipy import integrate
+from tethys_sdk.gizmos import PlotlyView
+
 
 def home(request):
     """
@@ -35,6 +29,7 @@ def home(request):
     }
 
     return render(request, 'historical_validation_tool_west_africa/home.html', context)
+
 
 def get_discharge_data(request):
     """
@@ -53,7 +48,8 @@ def get_discharge_data(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -174,10 +170,10 @@ def get_simulated_bc_data(request):
         simulated_df = pd.DataFrame(data=simulated_df.iloc[:, 0].values, index=simulated_df.index,
                                     columns=['Simulated Streamflow'])
 
-
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -195,7 +191,7 @@ def get_simulated_bc_data(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         # ----------------------------------------------
         # Chart Section
@@ -204,7 +200,7 @@ def get_simulated_bc_data(request):
         corrected_Q = go.Scatter(
             name='Corrected Simulated Discharge',
             x=corrected_df.index,
-            y=corrected_df.iloc[:,0].values,
+            y=corrected_df.iloc[:, 0].values,
             line=dict(color='#00cc96')
         )
 
@@ -240,7 +236,6 @@ def get_hydrographs(request):
         codEstacion = get_data['stationcode']
         nomEstacion = get_data['stationname']
 
-
         '''Get Simulated Data'''
 
         simulated_df = geoglows.streamflow.historic_simulation(comid, forcing='era_5', return_format='csv')
@@ -257,7 +252,8 @@ def get_hydrographs(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -275,7 +271,7 @@ def get_hydrographs(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -283,16 +279,15 @@ def get_hydrographs(request):
 
         merged_df2 = hd.merge_data(sim_df=corrected_df, obs_df=observed_df)
 
-
         '''Plotting Data'''
 
-        #observed_Q = go.Scatter(x=merged_df.index, y=merged_df.iloc[:, 1].values, name='Observed', )
+        # observed_Q = go.Scatter(x=merged_df.index, y=merged_df.iloc[:, 1].values, name='Observed', )
         observed_Q = go.Scatter(x=observed_df.index, y=observed_df.iloc[:, 0].values, name='Observed', )
 
-        #simulated_Q = go.Scatter(x=merged_df.index, y=merged_df.iloc[:, 0].values, name='Simulated', )
+        # simulated_Q = go.Scatter(x=merged_df.index, y=merged_df.iloc[:, 0].values, name='Simulated', )
         simulated_Q = go.Scatter(x=simulated_df.index, y=simulated_df.iloc[:, 0].values, name='Simulated', )
 
-        #corrected_Q = go.Scatter(x=merged_df2.index, y=merged_df2.iloc[:, 0].values, name='Corrected Simulated', )
+        # corrected_Q = go.Scatter(x=merged_df2.index, y=merged_df2.iloc[:, 0].values, name='Corrected Simulated', )
         corrected_Q = go.Scatter(x=corrected_df.index, y=corrected_df.iloc[:, 0].values, name='Corrected Simulated', )
 
         layout = go.Layout(
@@ -343,7 +338,8 @@ def get_dailyAverages(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -361,7 +357,7 @@ def get_dailyAverages(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -379,7 +375,8 @@ def get_dailyAverages(request):
 
         daily_avg_sim_Q = go.Scatter(x=daily_avg.index, y=daily_avg.iloc[:, 0].values, name='Simulated', )
 
-        daily_avg_corr_sim_Q = go.Scatter(x=daily_avg2.index, y=daily_avg2.iloc[:, 0].values, name='Corrected Simulated', )
+        daily_avg_corr_sim_Q = go.Scatter(x=daily_avg2.index, y=daily_avg2.iloc[:, 0].values,
+                                          name='Corrected Simulated', )
 
         layout = go.Layout(
             title='Daily Average Streamflow for  {0}-{1} <br> COMID: {2}'.format(watershed, subbasin, comid),
@@ -429,7 +426,8 @@ def get_monthlyAverages(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -447,7 +445,7 @@ def get_monthlyAverages(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -465,14 +463,16 @@ def get_monthlyAverages(request):
 
         monthly_avg_sim_Q = go.Scatter(x=monthly_avg.index, y=monthly_avg.iloc[:, 0].values, name='Simulated', )
 
-        monthly_avg_corr_sim_Q = go.Scatter(x=monthly_avg2.index, y=monthly_avg2.iloc[:, 0].values, name='Corrected Simulated', )
+        monthly_avg_corr_sim_Q = go.Scatter(x=monthly_avg2.index, y=monthly_avg2.iloc[:, 0].values,
+                                            name='Corrected Simulated', )
 
         layout = go.Layout(
             title='Monthly Average Streamflow for  {0}-{1} <br> COMID: {2}'.format(watershed, subbasin, comid),
             xaxis=dict(title='Months', ), yaxis=dict(title='Discharge (m<sup>3</sup>/s)', autorange=True),
             showlegend=True)
 
-        chart_obj = PlotlyView(go.Figure(data=[monthly_avg_obs_Q, monthly_avg_sim_Q, monthly_avg_corr_sim_Q], layout=layout))
+        chart_obj = PlotlyView(
+            go.Figure(data=[monthly_avg_obs_Q, monthly_avg_sim_Q, monthly_avg_corr_sim_Q], layout=layout))
 
         context = {
             'gizmo_object': chart_obj,
@@ -515,7 +515,8 @@ def get_scatterPlot(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -531,9 +532,9 @@ def get_scatterPlot(request):
 
         observed_df = pd.DataFrame(data=dataDischarge, index=datesDischarge, columns=['Observed Streamflow'])
 
-        '''Correct the Bias in Sumulation'''
+        '''Correct the Bias in Simulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -562,9 +563,6 @@ def get_scatterPlot(request):
         min_value = min(min(merged_df.iloc[:, 1].values), min(merged_df.iloc[:, 0].values))
         max_value = max(max(merged_df.iloc[:, 1].values), max(merged_df.iloc[:, 0].values))
 
-        min_value2 = min(min(merged_df2.iloc[:, 1].values), min(merged_df2.iloc[:, 0].values))
-        max_value2 = max(max(merged_df2.iloc[:, 1].values), max(merged_df2.iloc[:, 0].values))
-
         line_45 = go.Scatter(
             x=[min_value, max_value],
             y=[min_value, max_value],
@@ -577,7 +575,7 @@ def get_scatterPlot(request):
                                                                     merged_df.iloc[:, 1].values)
 
         slope2, intercept2, r_value2, p_value2, std_err2 = sp.linregress(merged_df2.iloc[:, 0].values,
-                                                                    merged_df2.iloc[:, 1].values)
+                                                                         merged_df2.iloc[:, 1].values)
 
         line_adjusted = go.Scatter(
             x=[min_value, max_value],
@@ -599,7 +597,8 @@ def get_scatterPlot(request):
                            xaxis=dict(title='Simulated', ), yaxis=dict(title='Observed', autorange=True),
                            showlegend=True)
 
-        chart_obj = PlotlyView(go.Figure(data=[scatter_data, scatter_data2, line_45, line_adjusted, line_adjusted2], layout=layout))
+        chart_obj = PlotlyView(
+            go.Figure(data=[scatter_data, scatter_data2, line_45, line_adjusted, line_adjusted2], layout=layout))
 
         context = {
             'gizmo_object': chart_obj,
@@ -642,7 +641,8 @@ def get_scatterPlotLogScale(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -660,7 +660,7 @@ def get_scatterPlotLogScale(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -744,7 +744,8 @@ def get_volumeAnalysis(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -762,7 +763,7 @@ def get_volumeAnalysis(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -851,7 +852,8 @@ def volume_table_ajax(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -869,7 +871,7 @@ def volume_table_ajax(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -991,7 +993,8 @@ def make_table_ajax(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -1009,7 +1012,7 @@ def make_table_ajax(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         '''Merge Data'''
 
@@ -1100,7 +1103,7 @@ def get_time_series(request):
         # Getting forecast record
         forecast_record = geoglows.streamflow.forecast_records(comid, return_format='csv')
         forecast_ensembles = geoglows.streamflow.forecast_ensembles(comid)
-        hydroviewer_figure = geoglows.plots.hydroviewer_plot(forecast_record, forecast_df, forecast_ensembles)
+        hydroviewer_figure = geoglows.plots.hydroviewer(forecast_record, forecast_df, forecast_ensembles)
 
         chart_obj = PlotlyView(hydroviewer_figure)
 
@@ -1142,7 +1145,8 @@ def get_time_series_bc(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -1158,24 +1162,23 @@ def get_time_series_bc(request):
 
         observed_df = pd.DataFrame(data=dataDischarge, index=datesDischarge, columns=['Observed Streamflow'])
 
-
         '''Get Forecast'''
 
-        forecast_df = geoglows.streamflow.forecast_stats(comid, return_format='csv')
+        forecast_df = geoglows.streamflow.forecast_stats(comid)
 
         # Removing Negative Values
         forecast_df[forecast_df < 0] = 0
 
         # Getting forecast record
-        forecast_record = geoglows.streamflow.forecast_records(comid, return_format='csv')
+        forecast_record = geoglows.streamflow.forecast_records(comid)
         forecast_ensembles = geoglows.streamflow.forecast_ensembles(comid)
 
         '''Correct Forecast'''
-        fixed_stats = geoglows.bias.correct_forecast_flows(forecast_df, simulated_df, observed_df)
-        fixed_records = geoglows.bias.correct_forecast_flows(forecast_record, simulated_df, observed_df, use_month=-1)
-        fixed_ensembles = geoglows.bias.correct_forecast_flows(forecast_ensembles, simulated_df, observed_df)
+        fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
+        fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
+        fixed_ensembles = geoglows.bias.correct_forecast(forecast_ensembles, simulated_df, observed_df)
 
-        hydroviewer_figure = geoglows.plots.hydroviewer_plot(fixed_records, fixed_stats, fixed_ensembles)
+        hydroviewer_figure = geoglows.plots.hydroviewer(fixed_records, fixed_stats, fixed_ensembles)
 
         chart_obj = PlotlyView(hydroviewer_figure)
 
@@ -1204,7 +1207,8 @@ def get_observed_discharge_csv(request):
         subbasin = get_data['subbasin']
         comid = get_data['streamcomid']
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -1218,7 +1222,9 @@ def get_observed_discharge_csv(request):
         pairs = [list(a) for a in zip(datesObservedDischarge, observedDischarge)]
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=observed_discharge_{0}-{1}_COMID_{2}'.format(watershed, subbasin, comid)
+        response['Content-Disposition'] = 'attachment; filename=observed_discharge_{0}-{1}_COMID_{2}'.format(watershed,
+                                                                                                             subbasin,
+                                                                                                             comid)
 
         writer = csv_writer(response)
         writer.writerow(['datetime', 'flow (m3/s)'])
@@ -1263,7 +1269,9 @@ def get_simulated_discharge_csv(request):
         pairs = [list(a) for a in zip(simulated_df.index, simulated_df.iloc[:, 0])]
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=simulated_discharge_{0}-{1}_COMID_{2}'.format(watershed, subbasin, comid)
+        response['Content-Disposition'] = 'attachment; filename=simulated_discharge_{0}-{1}_COMID_{2}'.format(watershed,
+                                                                                                              subbasin,
+                                                                                                              comid)
 
         writer = csv_writer(response)
         writer.writerow(['datetime', 'flow (m3/s)'])
@@ -1308,7 +1316,8 @@ def get_simulated_bc_discharge_csv(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -1326,10 +1335,11 @@ def get_simulated_bc_discharge_csv(request):
 
         '''Correct the Bias in Sumulation'''
 
-        corrected_df = geoglows.bias.correct_historical_simulation(simulated_df, observed_df)
+        corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=corrected_simulated_discharge_{0}-{1}_COMID_{2}'.format(watershed, subbasin, comid)
+        response['Content-Disposition'] = 'attachment; filename=corrected_simulated_discharge_{0}-{1}_COMID_{2}'.format(
+            watershed, subbasin, comid)
 
         corrected_df.to_csv(encoding='utf-8', header=True, path_or_buf=response)
 
@@ -1360,7 +1370,9 @@ def get_forecast_data_csv(request):
         forecast_df[forecast_df < 0] = 0
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=streamflow_forecast_{0}_{1}_{2}.csv'.format(watershed, subbasin, comid)
+        response['Content-Disposition'] = 'attachment; filename=streamflow_forecast_{0}_{1}_{2}.csv'.format(watershed,
+                                                                                                            subbasin,
+                                                                                                            comid)
 
         forecast_df.to_csv(encoding='utf-8', header=True, path_or_buf=response)
 
@@ -1402,7 +1414,8 @@ def get_forecast_bc_data_csv(request):
 
         '''Get Observed Data'''
 
-        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(codEstacion, nomEstacion)
+        url = 'https://www.hydroshare.org/resource/19ab54be1c9b40669a86076321552f07/data/contents/{0}_{1}.csv'.format(
+            codEstacion, nomEstacion)
 
         s = requests.get(url, verify=False).content
 
@@ -1420,16 +1433,17 @@ def get_forecast_bc_data_csv(request):
 
         '''Get Forecast'''
 
-        forecast_df = geoglows.streamflow.forecast_stats(comid, return_format='csv')
+        forecast_df = geoglows.streamflow.forecast_stats(comid)
 
         # Removing Negative Values
         forecast_df[forecast_df < 0] = 0
 
         '''Correct Forecast'''
-        fixed_stats = geoglows.bias.correct_forecast_flows(forecast_df, simulated_df, observed_df)
+        fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=corrected_streamflow_forecast_{0}_{1}_{2}.csv'.format(watershed, subbasin, comid)
+        response['Content-Disposition'] = 'attachment; filename=corrected_streamflow_forecast_{0}_{1}_{2}.csv'.format(
+            watershed, subbasin, comid)
 
         fixed_stats.to_csv(encoding='utf-8', header=True, path_or_buf=response)
 
