@@ -1067,6 +1067,9 @@ def make_table_ajax(request):
 
         table_final = pd.merge(table_html1, table_html2, right_index=True, left_index=True)
 
+        table_html2 = table_html2.to_html(classes="table table-hover table-striped", table_id="corrected_1").replace(
+            'border="1"', 'border="0"')
+
         table_final_html = table_final.to_html(classes="table table-hover table-striped",
                                                table_id="corrected_1").replace('border="1"', 'border="0"')
 
@@ -1101,9 +1104,10 @@ def get_time_series(request):
         # Removing Negative Values
         forecast_df[forecast_df < 0] = 0
         # Getting forecast record
-        forecast_record = geoglows.streamflow.forecast_records(comid, return_format='csv')
+        #forecast_record = geoglows.streamflow.forecast_records(comid, return_format='csv')
         forecast_ensembles = geoglows.streamflow.forecast_ensembles(comid)
-        hydroviewer_figure = geoglows.plots.hydroviewer(forecast_record, forecast_df, forecast_ensembles)
+        #hydroviewer_figure = geoglows.plots.hydroviewer(forecast_record, forecast_df, forecast_ensembles)
+        hydroviewer_figure = geoglows.plots.forecast_stats(stats=forecast_df, titles={'Reach ID': comid})
 
         chart_obj = PlotlyView(hydroviewer_figure)
 
@@ -1170,15 +1174,16 @@ def get_time_series_bc(request):
         forecast_df[forecast_df < 0] = 0
 
         # Getting forecast record
-        forecast_record = geoglows.streamflow.forecast_records(comid)
-        forecast_ensembles = geoglows.streamflow.forecast_ensembles(comid)
+        #forecast_record = geoglows.streamflow.forecast_records(comid)
+        #forecast_ensembles = geoglows.streamflow.forecast_ensembles(comid)
 
         '''Correct Forecast'''
         fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
-        fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
-        fixed_ensembles = geoglows.bias.correct_forecast(forecast_ensembles, simulated_df, observed_df)
+        #fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
+        #fixed_ensembles = geoglows.bias.correct_forecast(forecast_ensembles, simulated_df, observed_df)
 
-        hydroviewer_figure = geoglows.plots.hydroviewer(fixed_records, fixed_stats, fixed_ensembles)
+        #hydroviewer_figure = geoglows.plots.hydroviewer(fixed_records, fixed_stats, fixed_ensembles)
+        hydroviewer_figure = geoglows.plots.forecast_stats(stats=fixed_stats, titles={'Reach ID': comid})
 
         chart_obj = PlotlyView(hydroviewer_figure)
 

@@ -982,7 +982,7 @@ $(document).ready(function(){
 			'streamcomid': streamcomid,
 			'stationcode': stationcode,
 			'stationname': stationname,
-			'metrics': selected_metrics,
+			'metrics': selected_metric_joined,
 		}
 
 		for (let i = 0; i < additionalParametersNameList.length; i++) {
