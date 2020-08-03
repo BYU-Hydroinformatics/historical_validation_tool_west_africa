@@ -13,7 +13,7 @@ class HistoricalValidationToolWestAfrica(TethysAppBase):
     root_url = 'historical-validation-tool-west-africa'
     color = '#16a085'
     description = 'This app evaluates the accuracy for the historical streamflow values obtained from Streamflow Prediction Tool in West Africa.'
-    tags = ''
+    tags = 'Hydrology'
     enable_feedback = False
     feedback_emails = []
 
